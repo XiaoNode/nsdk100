@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>复）</title>
+  <!-- 引入Echarts库 -->
+  <!-- <script src="https://cdn.staticfile.net/echarts/4.7.0/echarts.min.js"></script> -->
+  <script src="./echarts.js"></script>
+</head>
+
+<body>
+  <!-- 为图表准备的DOM容器 -->
+  <div id="main" style="width: 1800px; height: 600px;"></div>
+  <script>
+    // 初始化Echarts实例
+    const myChart = echarts.init(document.getElementById('main'));
+
+    // 每月存入金额（单位：元）
+    const monthlyDeposit = 2000;
+    // 年利率（转换为小数形式）
+    const annualInterestRate = 0.1;
+    // 月利率，将年利率分摊到每月
+    const monthlyInterestRate = annualInterestRate / 12;
+    // 总月数，30年换算为月数
+    const totalMonths = 30 * 12;
+
+    // 用于存储每个月的账户余额和本金余额
+    const balanceList = [];
+    const principalList = [];
+    let balance = 0;
+    let principal = 0;
+
+    // 模拟每月存钱及计算复利的过程
+    for (let month = 0; month < totalMonths; month++) {
+      // 先存入本月金额
+      principal += monthlyDeposit;
+      balance += monthlyDeposit;
+      // 计算本月利息并加入余额（每月都计算利息）
+      balance *= (1 + monthlyInterestRate);
+
+      // 存储每月的总余额和本金余额
+      balanceList.push(balance);
+      principalList.push(principal);
+    }
+
+    // 准备x轴数据，格式化为"年-月"形式
+    const xAxisData = [];
+    for (let i = 0; i < totalMonths; i++) {
+      const year = 2025 + Math.floor(i / 12);
+      const month = (i % 12 + 1).toString().padStart(2, '0');
+      xAxisData.push(`${year}-${month}`);
+    }
+
+    // 配置Echarts图表选项
+    const option = {
+      title: {
+        text: '复 ）'
+      },
+      tooltip: {
+        trigger: 'axis',
+        formatter: function (params) {
+          const totalAmount = params[0].data.toFixed(2);
+          const principalAmount = params[1].data.toFixed(2);
+          const interestAmount = (totalAmount - principalAmount).toFixed(2);
+          return `时间：${params[0].axisValue}<br>总金额：${totalAmount} 元<br>本金：${principalAmount} 元<br>利息：${interestAmount} 元`;
+        }
+      },
+      xAxis: {
+        type: 'category',
+        data: xAxisData
+      },
+      yAxis: {
+        type: 'value',
+        name: 'yue e'
+      },
+      series: [
+        {
+          name: 'zong',
+          type: 'line',
+          data: balanceList,
+          lineStyle: { color: '#2f8c2f' } // 绿色表示总余额
+        },
+        {
+          name: 'benjin',
+          type: 'line',
+          data: principalList,
+          lineStyle: { color: '#ff9800' }, // 橙色表示本金
+        }
+      ]
+    };
+
+    // 使用配置项渲染图表
+    myChart.setOption(option);
+  </script>
+</body>
+
+</html>
