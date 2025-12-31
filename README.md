@@ -1,1 +1,13 @@
-**NASDAQ 100 index simulation**
+**复利计算与定投可视化 小玩具**
+
+- 功能：模拟每月定投并按年化利率按月复利，展示总金额与本金的时间序列
+- 技术：纯前端，使用 `ECharts` 绘制折线图
+- 运行：直接用浏览器打开 `index.html`
+- 可调参数（在 `index.html` 中修改）：
+  - `monthlyDeposit`：每月存入金额，默认 `2000`
+  - `annualInterestRate`：年利率，默认 `0.1`（10%）
+  - `totalMonths`：总月数，默认 `30 * 12`
+- 图表：绿色为总金额，橙色为本金；悬浮提示显示时间、总金额、本金与利息
+- 文件结构：
+  - `index.html`：页面与逻辑
+  - `echarts.js`：本地引入的 ECharts 库

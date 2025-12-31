@@ -4,95 +4,183 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>fuli</title>
+  <title>复利计算器</title>
   <!-- 引入Echarts库 -->
-  <!-- <script src="https://cdn.staticfile.net/echarts/4.7.0/echarts.min.js"></script> -->
   <script src="./echarts.js"></script>
+  <style>
+    .controls {
+      margin: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    .control-group {
+      display: inline-block;
+      margin-right: 20px;
+      margin-bottom: 10px;
+    }
+    
+    label {
+      display: inline-block;
+      width: 120px;
+      font-weight: bold;
+    }
+    
+    input {
+      width: 100px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    
+    button {
+      padding: 8px 15px;
+      background-color: #2f8c2f;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    
+    button:hover {
+      background-color: #256d25;
+    }
+  </style>
 </head>
 
 <body>
+  <!-- 控制面板 -->
+  <div class="controls">
+    <div class="control-group">
+      <label for="monthlyDeposit">每月存入金额(元):</label>
+      <input type="number" id="monthlyDeposit" value="2000" min="1">
+    </div>
+    <div class="control-group">
+      <label for="annualInterestRate">年利率(%):</label>
+      <input type="number" id="annualInterestRate" value="10" min="0" max="100" step="0.1">
+    </div>
+    <div class="control-group">
+      <label for="totalYears">总年数:</label>
+      <input type="number" id="totalYears" value="30" min="1">
+    </div>
+    <button onclick="updateChart()">更新图表</button>
+  </div>
+
   <!-- 为图表准备的DOM容器 -->
   <div id="main" style="width: 1800px; height: 600px;"></div>
+
   <script>
     // 初始化Echarts实例
     const myChart = echarts.init(document.getElementById('main'));
 
-    // 每月存入金额（单位：元）
-    const monthlyDeposit = 2000;
-    // 年利率（转换为小数形式）
-    const annualInterestRate = 0.1;
-    // 月利率，将年利率分摊到每月
-    const monthlyInterestRate = annualInterestRate / 12;
-    // 总月数，30年换算为月数
-    const totalMonths = 30 * 12;
+    // 计算并绘制图表的函数
+    function calculateAndRenderChart() {
+      // 获取用户输入的值
+      const monthlyDeposit = parseFloat(document.getElementById('monthlyDeposit').value);
+      const annualInterestRate = parseFloat(document.getElementById('annualInterestRate').value) / 100;
+      const totalYears = parseInt(document.getElementById('totalYears').value);
+      const totalMonths = totalYears * 12;
 
-    // 用于存储每个月的账户余额和本金余额
-    const balanceList = [];
-    const principalList = [];
-    let balance = 0;
-    let principal = 0;
+      // 月利率，将年利率分摊到每月
+      const monthlyInterestRate = annualInterestRate / 12;
 
-    // 模拟每月存钱及计算复利的过程
-    for (let month = 0; month < totalMonths; month++) {
-      // 先存入本月金额
-      principal += monthlyDeposit;
-      balance += monthlyDeposit;
-      // 计算本月利息并加入余额（每月都计算利息）
-      balance *= (1 + monthlyInterestRate);
+      // 用于存储每个月的账户余额和本金余额
+      const balanceList = [];
+      const principalList = [];
+      let balance = 0;
+      let principal = 0;
 
-      // 存储每月的总余额和本金余额
-      balanceList.push(balance);
-      principalList.push(principal);
-    }
+      // 模拟每月存钱及计算复利的过程
+      for (let month = 0; month < totalMonths; month++) {
+        // 先存入本月金额
+        principal += monthlyDeposit;
+        balance += monthlyDeposit;
+        // 计算本月利息并加入余额（每月都计算利息）
+        balance *= (1 + monthlyInterestRate);
 
-    // 准备x轴数据，格式化为"年-月"形式
-    const xAxisData = [];
-    for (let i = 0; i < totalMonths; i++) {
-      const year = 2025 + Math.floor(i / 12);
-      const month = (i % 12 + 1).toString().padStart(2, '0');
-      xAxisData.push(`${year}-${month}`);
-    }
+        // 存储每月的总余额和本金余额
+        balanceList.push(balance);
+        principalList.push(principal);
+      }
 
-    // 配置Echarts图表选项
-    const option = {
-      title: {
-        text: '复利计算'
-      },
-      tooltip: {
-        trigger: 'axis',
-        formatter: function (params) {
-          const totalAmount = params[0].data.toFixed(2);
-          const principalAmount = params[1].data.toFixed(2);
-          const interestAmount = (totalAmount - principalAmount).toFixed(2);
-          return `时间：${params[0].axisValue}<br>总金额：${totalAmount} 元<br>本金：${principalAmount} 元<br>利息：${interestAmount} 元`;
-        }
-      },
-      xAxis: {
-        type: 'category',
-        data: xAxisData
-      },
-      yAxis: {
-        type: 'value',
-        name: 'yue e'
-      },
-      series: [
-        {
-          name: 'zong',
-          type: 'line',
-          data: balanceList,
-          lineStyle: { color: '#2f8c2f' } // 绿色表示总余额
+      // 准备x轴数据，格式化为"年-月"形式
+      const xAxisData = [];
+      for (let i = 0; i < totalMonths; i++) {
+        const year = 2025 + Math.floor(i / 12);
+        const month = (i % 12 + 1).toString().padStart(2, '0');
+        xAxisData.push(`${year}-${month}`);
+      }
+
+      // 配置Echarts图表选项
+      const option = {
+        title: {
+          text: '复利计算器',
+          subtext: `每月存入: ${monthlyDeposit}元, 年利率: ${(annualInterestRate * 100).toFixed(1)}%, 总期数: ${totalYears}年`
         },
-        {
-          name: 'benjin',
-          type: 'line',
-          data: principalList,
-          lineStyle: { color: '#ff9800' }, // 橙色表示本金
-        }
-      ]
-    };
+        tooltip: {
+          trigger: 'axis',
+          formatter: function (params) {
+            const totalAmount = params[0].data.toFixed(2);
+            const principalAmount = params[1].data.toFixed(2);
+            const interestAmount = (totalAmount - principalAmount).toFixed(2);
+            return `时间：${params[0].axisValue}<br>总金额：${totalAmount} 元<br>本金：${principalAmount} 元<br>利息：${interestAmount} 元`;
+          }
+        },
+        legend: {
+          data: ['总金额', '本金'],
+          top: '30px'
+        },
+        xAxis: {
+          type: 'category',
+          data: xAxisData,
+          axisLabel: {
+            interval: Math.floor(xAxisData.length / 20) // 控制x轴标签密度，避免过于拥挤
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: '金额 (元)'
+        },
+        series: [
+          {
+            name: '总金额',
+            type: 'line',
+            data: balanceList,
+            lineStyle: { color: '#2f8c2f' } // 绿色表示总余额
+          },
+          {
+            name: '本金',
+            type: 'line',
+            data: principalList,
+            lineStyle: { color: '#ff9800' } // 橙色表示本金
+          }
+        ]
+      };
 
-    // 使用配置项渲染图表
-    myChart.setOption(option);
+      // 使用配置项渲染图表
+      myChart.setOption(option);
+      
+      // 使图表响应窗口大小变化
+      window.addEventListener('resize', function() {
+        myChart.resize();
+      });
+    }
+
+    // 页面加载完成后执行一次计算
+    calculateAndRenderChart();
+
+    // 更新图表函数（供按钮调用）
+    function updateChart() {
+      calculateAndRenderChart();
+    }
+
+    // 当输入框值改变时也可以更新图表（可选功能）
+    document.getElementById('monthlyDeposit').addEventListener('change', updateChart);
+    document.getElementById('annualInterestRate').addEventListener('change', updateChart);
+    document.getElementById('totalYears').addEventListener('change', updateChart);
   </script>
 </body>
 
