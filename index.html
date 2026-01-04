@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>复利计算器</title>
+  <title>Compound Interest Calculator</title>
   <!-- 引入Echarts库 -->
   <script src="./echarts.js"></script>
   <style>
@@ -55,18 +55,18 @@
   <!-- 控制面板 -->
   <div class="controls">
     <div class="control-group">
-      <label for="monthlyDeposit">每月存入金额(元):</label>
+      <label for="monthlyDeposit">Monthly Deposit:</label>
       <input type="number" id="monthlyDeposit" value="2000" min="1">
     </div>
     <div class="control-group">
-      <label for="annualInterestRate">年利率(%):</label>
+      <label for="annualInterestRate">Annual Interest Rate (%):</label>
       <input type="number" id="annualInterestRate" value="10" min="0" max="100" step="0.1">
     </div>
     <div class="control-group">
-      <label for="totalYears">总年数:</label>
+      <label for="totalYears">Total Years:</label>
       <input type="number" id="totalYears" value="30" min="1">
     </div>
-    <button onclick="updateChart()">更新图表</button>
+    <button onclick="updateChart()">Update Chart</button>
   </div>
 
   <!-- 为图表准备的DOM容器 -->
@@ -114,11 +114,30 @@
         xAxisData.push(`${year}-${month}`);
       }
 
+      // Calculate current date index for red dot marker
+      const now = new Date();
+      const currentMonthStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+      const currentIndex = xAxisData.indexOf(currentMonthStr);
+      const markPointData = [];
+      if (currentIndex !== -1) {
+        markPointData.push({
+          coord: [currentMonthStr, balanceList[currentIndex]],
+          value: 'Now',
+          itemStyle: { color: 'red' }
+        });
+      }
+
       // 配置Echarts图表选项
       const option = {
         title: {
-          text: '复利计算器',
-          subtext: `每月存入: ${monthlyDeposit}元, 年利率: ${(annualInterestRate * 100).toFixed(1)}%, 总期数: ${totalYears}年`
+          // text: '复利计算器',
+          // subtext: `每月存入: ${monthlyDeposit}元, 年利率: ${(annualInterestRate * 100).toFixed(1)}%, 总期数: ${totalYears}年`
+          text: 'Compound Interest Calculator',
+          subtext: `Monthly Deposit: ${monthlyDeposit}, Annual Rate: ${(annualInterestRate * 100).toFixed(1)}%, Period: ${totalYears} Years`
+        },
+        grid: {
+          top: 100,
+          containLabel: true
         },
         tooltip: {
           trigger: 'axis',
@@ -130,7 +149,7 @@
           }
         },
         legend: {
-          data: ['总金额', '本金'],
+          data: ['Total Amount', 'principal'],
           top: '30px'
         },
         xAxis: {
@@ -142,17 +161,23 @@
         },
         yAxis: {
           type: 'value',
-          name: '金额 (元)'
+          name: 'Amount (yuan)'
         },
         series: [
           {
-            name: '总金额',
+            name: 'Total Amount',
             type: 'line',
             data: balanceList,
-            lineStyle: { color: '#2f8c2f' } // 绿色表示总余额
+            lineStyle: { color: '#2f8c2f' }, // 绿色表示总余额
+            markPoint: {
+              symbol: 'circle',
+              symbolSize: 8,
+              label: { show: true, position: 'top', formatter: 'Now' },
+              data: markPointData
+            }
           },
           {
-            name: '本金',
+            name: 'principal',
             type: 'line',
             data: principalList,
             lineStyle: { color: '#ff9800' } // 橙色表示本金
