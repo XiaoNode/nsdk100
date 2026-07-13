@@ -1,0 +1,40 @@
+name: Update NDX data
+
+# 每天美东收盘后自动刷新 NDX 数据，并提交 ndx_data.js，
+# 从而让 GitHub Pages 展示的最新数据每日更新。
+on:
+  schedule:
+    # UTC 21:00 = 美东 16:00/17:00（夏令时17:00 / 冬令时16:00），美股收盘后
+    # 仅工作日（周一至周五）运行，避开周末
+    - cron: '0 21 * * 1-5'
+  workflow_dispatch: {}   # 允许在 Actions 页面手动触发
+
+permissions:
+  contents: write        # 需要写权限以提交 ndx_data.js
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run updater
+        run: python update_ndx.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ndx_data.js
+          if git diff --cached --quiet; then
+            echo "ndx_data.js 无变化，跳过提交"
+          else
+            git commit -m "chore: daily NDX data update"
+            git push
+          fi

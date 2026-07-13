@@ -7,6 +7,8 @@
   <title>Compound Interest Calculator</title>
   <!-- 引入Echarts库 -->
   <script src="./echarts.js"></script>
+  <!-- NDX 查询结果数据（由 update_ndx.py 生成，每个交易日后更新） -->
+  <script src="./ndx_data.js"></script>
   <style>
     .controls {
       margin: 20px;
@@ -48,6 +50,64 @@
     button:hover {
       background-color: #256d25;
     }
+
+    /* ===== NDX 查询结果面板 ===== */
+    .ndx-query {
+      margin: 20px;
+    }
+
+    .ndx-card {
+      padding: 16px 18px;
+      border: 1px solid #e0e0e0;
+      border-left: 5px solid #888;
+      border-radius: 6px;
+      background-color: #fafafa;
+      line-height: 1.7;
+    }
+
+    .ndx-sentence {
+      font-size: 16px;
+      font-weight: 600;
+      color: #222;
+    }
+
+    .ndx-meta {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .ndx-meta code {
+      background: #eee;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* 涨：红（A股习惯）；跌：绿 */
+    .ndx-up {
+      border-left-color: #e23b3b;
+      background-color: #fdf3f3;
+    }
+
+    .ndx-up .ndx-sentence {
+      color: #c0392b;
+    }
+
+    .ndx-down {
+      border-left-color: #2f9e44;
+      background-color: #f1fbf3;
+    }
+
+    .ndx-down .ndx-sentence {
+      color: #2f7d32;
+    }
+
+    .ndx-muted {
+      border-left-color: #bbb;
+      color: #777;
+      font-weight: 400;
+      font-size: 14px;
+    }
   </style>
 </head>
 
@@ -71,6 +131,9 @@
 
   <!-- 为图表准备的DOM容器 -->
   <div id="main" style="width: 1800px; height: 600px;"></div>
+
+  <!-- NDX 查询结果展示 -->
+  <div id="ndxQuery" class="ndx-query"></div>
 
   <script>
     // 初始化Echarts实例
@@ -196,10 +259,74 @@
 
     // 页面加载完成后执行一次计算
     calculateAndRenderChart();
+    // 渲染 NDX 查询结果面板
+    renderNDXQuery();
 
     // 更新图表函数（供按钮调用）
     function updateChart() {
       calculateAndRenderChart();
+    }
+
+    // ===== NDX 查询结果渲染 =====
+    // 读取 window.NDX_DATA（由 update_ndx.py 生成），渲染历史最高与最新收盘对比
+    function renderNDXQuery() {
+      const el = document.getElementById('ndxQuery');
+      if (typeof window.NDX_DATA === 'undefined' || !window.NDX_DATA) {
+        el.innerHTML = '<div class="ndx-card ndx-muted">NDX 查询结果暂不可用：请运行 <code>update_ndx.py</code> 生成 ndx_data.js（每个交易日后更新）。</div>';
+        return;
+      }
+
+      const d = window.NDX_DATA;
+      const high = Number(d.highValue);
+      const latest = Number(d.latestValue);
+      const diff = latest - high;
+      const pct = high !== 0 ? (diff / high) * 100 : 0;
+      const up = diff >= 0;
+      const dir = up ? '上升了' : '下降了';
+
+      const fmt2 = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const highStr = fmt2(high);
+      const latestStr = fmt2(latest);
+      const diffStr = fmt2(Math.abs(diff));
+      const pctStr = fmt2(Math.abs(pct));
+
+      // 结果文案（时间以美国纳斯达克交易时区 America/New_York 为准）
+      const sentence = 'NDX 最高记录是 ' + highStr + ' 点（' + cnDate(d.highDate) + '），' +
+        '今天是 ' + cnDate(d.latestDate) + '（美东时间）NDX 为 ' + latestStr + ' 点，' +
+        '距离最高点' + dir + ' ' + diffStr + ' 点，' + dir + ' ' + pctStr + '%。';
+
+      let updatedLine = '';
+      if (d.updatedAtEpoch) {
+        const ue = new Date(d.updatedAtEpoch * 1000);
+        const fmt = new Intl.DateTimeFormat('zh-CN', {
+          timeZone: 'America/New_York',
+          year: 'numeric', month: 'long', day: 'numeric',
+          hour: '2-digit', minute: '2-digit', hour12: false
+        });
+        updatedLine = '数据更新于（美东时间）：' + fmt.format(ue);
+      }
+
+      const cls = up ? 'ndx-up' : 'ndx-down';
+      el.innerHTML =
+        '<div class="ndx-card ' + cls + '">' +
+          '<div class="ndx-sentence">' + sentence + '</div>' +
+          '<div class="ndx-meta">' + updatedLine +
+            ' ｜ 数据源：' + escapeHtml(d.source || '') + '</div>' +
+        '</div>';
+    }
+
+    // YYYY-MM-DD -> YYYY年M月D日
+    function cnDate(s) {
+      const parts = String(s).split('-').map(Number);
+      if (parts.length < 3) return String(s);
+      return parts[0] + '年' + parts[1] + '月' + parts[2] + '日';
+    }
+
+    // 简易 HTML 转义，防止数据源字段注入
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
     }
 
     // 当输入框值改变时也可以更新图表（可选功能）
