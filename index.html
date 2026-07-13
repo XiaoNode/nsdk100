@@ -271,8 +271,10 @@
     // 读取 window.NDX_DATA（由 update_ndx.py 生成），渲染历史最高与最新收盘对比
     function renderNDXQuery() {
       const el = document.getElementById('ndxQuery');
+      const idxName = (window.NDX_DATA && window.NDX_DATA.name) ? window.NDX_DATA.name : 'NDX100（纳斯达克100指数）';
+      const shortName = 'NDX100';
       if (typeof window.NDX_DATA === 'undefined' || !window.NDX_DATA) {
-        el.innerHTML = '<div class="ndx-card ndx-muted">NDX 查询结果暂不可用：请运行 <code>update_ndx.py</code> 生成 ndx_data.js（每个交易日后更新）。</div>';
+        el.innerHTML = '<div class="ndx-card ndx-muted">' + idxName + ' 查询结果暂不可用：请运行 <code>update_ndx.py</code> 生成 ndx_data.js（每个交易日后更新）。</div>';
         return;
       }
 
@@ -291,8 +293,8 @@
       const pctStr = fmt2(Math.abs(pct));
 
       // 结果文案（时间以美国纳斯达克交易时区 America/New_York 为准）
-      const sentence = 'NDX 最高记录是 ' + highStr + ' 点（' + cnDate(d.highDate) + '），' +
-        '今天是 ' + cnDate(d.latestDate) + '（美东时间）NDX 为 ' + latestStr + ' 点，' +
+      const sentence = idxName + ' 最高记录是 ' + highStr + ' 点（' + cnDate(d.highDate) + '），' +
+        '今天是 ' + cnDate(d.latestDate) + '（美东时间）' + shortName + ' 为 ' + latestStr + ' 点，' +
         '距离最高点' + dir + ' ' + diffStr + ' 点，' + dir + ' ' + pctStr + '%。';
 
       let updatedLine = '';

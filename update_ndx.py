@@ -4,7 +4,7 @@
 update_ndx.py — 生成 NDX（纳斯达克100指数）查询结果数据文件 ndx_data.js
 
 功能：
-  拉取 NDX 日线历史，计算：
+  拉取 NDX100（纳斯达克100指数，^NDX）日线历史，计算：
     1) 历史最高收盘记录（all-time high close）及日期
     2) 最新交易日收盘点位及日期
   并写入 ndx_data.js（定义 window.NDX_DATA 全局变量），供 index.html 以 <script> 引入。
@@ -124,12 +124,14 @@ def main():
     latest_date, latest_val = records[-1]
 
     data = {
+        "symbol": "^NDX",
+        "name": "纳斯达克100指数 (NDX100)",
         "highValue": round(high_val, 2),
         "highDate": high_date,
         "latestValue": round(latest_val, 2),
         "latestDate": latest_date,
         "updatedAtEpoch": int(time.time()),
-        "source": "Stooq / Yahoo Finance · NDX 每日收盘",
+        "source": "Stooq / Yahoo Finance · NDX100 (^NDX) 每日收盘",
     }
 
     js = "window.NDX_DATA = " + json.dumps(data, ensure_ascii=False) + ";\n"
