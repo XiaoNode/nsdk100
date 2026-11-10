@@ -1,1 +1,1 @@
-window.NDX_DATA = {"symbol": "^NDX", "name": "纳斯达克100指数 (NDX100)", "highValue": 30408.5, "highDate": "2026-07-01", "latestValue": 26989.99, "latestDate": "2026-11-06", "updatedAtEpoch": 1794011222, "source": "Stooq / Yahoo Finance · NDX100 (^NDX) 每日收盘"};
+window.NDX_DATA = {"symbol": "^NDX", "name": "纳斯达克100指数 (NDX100)", "highValue": 30408.5, "highDate": "2026-07-01", "latestValue": 27907.62, "latestDate": "2026-11-09", "updatedAtEpoch": 1794279662, "source": "Stooq / Yahoo Finance · NDX100 (^NDX) 每日收盘"};
